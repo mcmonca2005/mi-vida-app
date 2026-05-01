@@ -500,10 +500,11 @@ async function save(){
 // ─── TOTALS ───
 function calcTotals(){
   const inc=state.income.reduce((s,i)=>s+i.amt,0);
-  const fix=state.fixed.reduce((s,i)=>s+i.amt,0);
+  const fix=state.fixed.filter(i=>i.cat!=='Ahorro').reduce((s,i)=>s+i.amt,0);
   const vari=state.variable.reduce((s,i)=>s+i.amt,0);
-  const exp=fix+vari;const bal=inc-exp;
+  const exp=fix+vari;
   const sav=state.metas.reduce((s,m)=>s+(m.ahorrado||0),0);
+  const bal=inc-exp-sav;
   const bolTotal=state.bolsillos.reduce((s,b)=>s+b.asignado,0);
   const mEl=document.getElementById('m-inc');if(mEl)mEl.textContent=fmt(inc);
   const bEl=document.getElementById('m-bal');if(bEl){bEl.textContent=fmt(bal);bEl.style.color=bal>=0?'var(--green)':'var(--red)';}
@@ -623,7 +624,9 @@ window.confirmModal2=()=>{
   if(m2Mode==='ahorro'){
     if(m2Idx<0||m2Idx>=state.metas.length){toast('Selecciona una meta');return;}
     state.metas[m2Idx].ahorrado=(state.metas[m2Idx].ahorrado||0)+amt;
-    save();renderAll();closeModal2();
+    // El ahorro resta del disponible — se registra como gasto especial
+    state.fixed.push({name:`Ahorro — ${state.metas[m2Idx].name}`,amt,cat:'Ahorro',ts:Date.now()});
+    save();renderAll();renderMetas();closeModal2();
     const pct=Math.min(100,Math.round(state.metas[m2Idx].ahorrado/state.metas[m2Idx].objetivo*100));
     toast('Abono ✓ — '+pct+'% completado');
     if(pct>=100)setTimeout(()=>toast('🎉 ¡Meta alcanzada!'),2400);
