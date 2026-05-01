@@ -19,118 +19,119 @@
   --red:#ff6b7a;--red-bg:rgba(255,107,122,.12);
   --amber:#ffb347;--amber-bg:rgba(255,179,71,.12);
   --purple:#b47aff;--purple-bg:rgba(180,122,255,.12);
-  --pink:#ff7ab8;--pink-bg:rgba(255,122,184,.12);
   --radius:14px;--radius-sm:8px;
-  --shadow:0 4px 24px rgba(0,0,0,.4);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;padding-bottom:80px;font-size:15px}
-/* NAV */
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;padding-bottom:84px;font-size:15px}
 .nav-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--bg4);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
-.nav-btn{flex:1;padding:10px 0 12px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;border:none;background:none;color:var(--text3);font-size:10px;font-weight:500;transition:color .2s}
+.nav-btn{flex:1;padding:10px 0 12px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border:none;background:none;color:var(--text3);font-size:9px;font-weight:500;transition:color .2s}
 .nav-btn.active{color:var(--green)}
-.nav-icon{font-size:20px;line-height:1}
-/* HEADER */
+.nav-icon{font-size:19px;line-height:1}
 .page-header{padding:20px 16px 12px;background:linear-gradient(180deg,var(--bg2),transparent)}
 .page-header h1{font-size:22px;font-weight:700;letter-spacing:-.3px}
 .page-header p{font-size:13px;color:var(--text2);margin-top:2px}
-/* SECTIONS */
 .section{display:none;padding:0 12px;animation:fadeIn .2s ease}
 .section.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-/* METRICS */
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
 .metric{background:var(--bg2);border-radius:var(--radius-sm);padding:12px 8px;text-align:center;border:1px solid var(--bg4)}
 .metric-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
-.metric-value{font-size:18px;font-weight:700}
-/* CARDS */
+.metric-value{font-size:17px;font-weight:700}
 .card{background:var(--bg2);border:1px solid var(--bg4);border-radius:var(--radius);padding:16px;margin-bottom:12px}
 .card-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;display:flex;align-items:center;gap:6px}
 .card-title span{font-size:14px}
-/* ITEMS */
 .item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bg3)}
 .item:last-child{border-bottom:none}
 .item-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .item-name{flex:1;font-size:14px}
 .item-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
 .item-amount{font-size:14px;font-weight:600;min-width:70px;text-align:right}
-.item-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 4px;line-height:1;transition:color .15s}
-.item-del:hover{color:var(--red)}
+.item-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 4px;line-height:1}
 .empty{font-size:13px;color:var(--text3);padding:8px 0;text-align:center}
-/* ADD FORM */
 .add-row{display:flex;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid var(--bg3)}
 .add-row input{background:var(--bg3);border:1px solid var(--bg4);border-radius:var(--radius-sm);padding:8px 10px;color:var(--text);font-size:13px;outline:none;transition:border .15s}
 .add-row input:focus{border-color:var(--green)}
 .add-row input[type=text]{flex:2}
 .add-row input[type=number]{flex:1;min-width:80px}
-.add-btn{background:var(--green);border:none;border-radius:var(--radius-sm);color:#000;font-weight:700;font-size:18px;width:38px;flex-shrink:0;cursor:pointer;transition:opacity .15s}
+.add-btn{background:var(--green);border:none;border-radius:var(--radius-sm);color:#000;font-weight:700;font-size:18px;width:38px;flex-shrink:0;cursor:pointer}
 .add-btn:active{opacity:.7}
-/* CHART */
-.chart-wrap{position:relative;width:100%;height:200px;margin:8px 0}
-.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
-.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
-.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.progress{background:rgba(255,255,255,.1);border-radius:20px;height:6px;overflow:hidden}
+.progress-fill{height:100%;border-radius:20px;transition:width .4s ease}
 /* AREAS */
 .area-card{border-radius:var(--radius);padding:14px;margin-bottom:10px;border:1px solid}
 .area-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.area-emoji{font-size:22px;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.07)}
+.area-emoji{font-size:20px;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.07)}
 .area-info{flex:1}
 .area-name{font-size:15px;font-weight:600}
 .area-time{font-size:12px;color:var(--text2);margin-top:1px}
 .area-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;flex-shrink:0}
-.progress{background:rgba(255,255,255,.1);border-radius:20px;height:4px;margin-bottom:10px;overflow:hidden}
-.progress-fill{height:100%;border-radius:20px;transition:width .4s ease}
 .task-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)}
 .task-item:last-child{border-bottom:none}
 .task-cb{width:18px;height:18px;border-radius:5px;border:2px solid;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .task-cb.checked{background:var(--green);border-color:var(--green)}
 .task-cb.checked::after{content:'✓';font-size:11px;color:#000;font-weight:700}
-.task-name{flex:1;font-size:13px;cursor:pointer;transition:opacity .15s}
+.task-name{flex:1;font-size:13px;cursor:pointer}
 .task-name.done{opacity:.4;text-decoration:line-through}
-.task-del-btn{background:none;border:none;color:rgba(255,255,255,.2);cursor:pointer;font-size:16px;padding:0 4px;transition:color .15s}
-.task-del-btn:hover{color:var(--red)}
+.task-del-btn{background:none;border:none;color:rgba(255,255,255,.2);cursor:pointer;font-size:16px;padding:0 4px}
 .add-task{display:flex;gap:6px;margin-top:10px}
 .add-task input{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);padding:7px 10px;color:var(--text);font-size:13px;outline:none}
 .add-task input:focus{border-color:rgba(255,255,255,.3)}
 .add-task button{background:rgba(255,255,255,.1);border:none;border-radius:var(--radius-sm);color:var(--text);font-size:18px;width:34px;cursor:pointer}
+/* AHORROS */
+.meta-card{background:var(--bg2);border:1px solid var(--bg4);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.meta-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.meta-emoji{font-size:22px;width:42px;height:42px;border-radius:10px;background:rgba(180,122,255,.15);display:flex;align-items:center;justify-content:center}
+.meta-info{flex:1}
+.meta-name{font-size:15px;font-weight:600}
+.meta-amounts{font-size:12px;color:var(--text2);margin-top:2px}
+.meta-pct{font-size:15px;font-weight:700;color:var(--purple)}
+.meta-progress{margin-bottom:12px}
+.meta-bar{background:rgba(255,255,255,.1);border-radius:20px;height:8px;overflow:hidden;margin-top:6px}
+.meta-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--purple),var(--blue));transition:width .4s ease}
+.meta-actions{display:flex;gap:8px}
+.meta-actions input{flex:1;background:var(--bg3);border:1px solid var(--bg4);border-radius:var(--radius-sm);padding:7px 10px;color:var(--text);font-size:13px;outline:none}
+.meta-actions input:focus{border-color:var(--purple)}
+.abono-btn{background:var(--purple);border:none;border-radius:var(--radius-sm);color:#fff;font-size:13px;font-weight:600;padding:0 14px;cursor:pointer;white-space:nowrap}
+.abono-btn:active{opacity:.7}
+.del-meta{background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:2px 6px}
+.nueva-meta{display:flex;flex-direction:column;gap:8px}
+.nueva-meta input{background:var(--bg3);border:1px solid var(--bg4);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);font-size:14px;outline:none;width:100%}
+.nueva-meta input:focus{border-color:var(--purple)}
+.nueva-meta-row{display:flex;gap:8px}
+.nueva-meta-row input{flex:1}
+.nueva-meta button{background:var(--purple);border:none;border-radius:var(--radius-sm);color:#fff;font-size:14px;font-weight:600;padding:10px;cursor:pointer;width:100%}
+.ahorro-metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
 /* RESUMEN */
 .sum-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bg3)}
 .sum-row:last-child{border-bottom:none}
-.sum-area{display:flex;align-items:center;gap:8px;font-size:14px}
-.sum-pct{font-size:14px;font-weight:600}
-/* AI BTN */
-.ai-btn{width:100%;padding:14px;border-radius:var(--radius);border:1px solid var(--green);background:var(--green-bg);color:var(--green);font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;transition:all .2s}
+.ai-btn{width:100%;padding:14px;border-radius:var(--radius);border:1px solid var(--green);background:var(--green-bg);color:var(--green);font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px}
 .ai-btn:active{opacity:.7}
-/* TOAST */
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--bg3);color:var(--text);padding:10px 20px;border-radius:var(--radius-sm);font-size:13px;opacity:0;transition:all .3s;z-index:999;border:1px solid var(--bg4);pointer-events:none}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-/* DONUT */
+.chart-wrap{position:relative;width:100%;height:200px;margin:8px 0}
 .donut-wrap{display:flex;align-items:center;gap:16px;margin-bottom:8px}
 .donut-chart{position:relative;width:120px;height:120px;flex-shrink:0}
 .donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
 .donut-label{font-size:10px;color:var(--text3);margin-bottom:2px}
 .donut-value{font-size:16px;font-weight:700}
-/* SCROLLBAR */
+.legend{display:flex;flex-wrap:wrap;gap:8px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
+.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--bg3);color:var(--text);padding:10px 20px;border-radius:var(--radius-sm);font-size:13px;opacity:0;transition:all .3s;z-index:999;border:1px solid var(--bg4);pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px}
 </style>
 </head>
 <body>
-
 <div id="toast" class="toast"></div>
 
 <!-- FINANZAS -->
 <div class="section active" id="sec-finanzas">
-  <div class="page-header">
-    <h1>Finanzas</h1>
-    <p id="fin-date"></p>
-  </div>
-  <div class="metrics" id="metrics-box">
+  <div class="page-header"><h1>Finanzas</h1><p id="fin-date"></p></div>
+  <div class="metrics">
     <div class="metric"><div class="metric-label">Ingresos</div><div class="metric-value" id="m-income" style="color:var(--green)">$0</div></div>
     <div class="metric"><div class="metric-label">Gastos</div><div class="metric-value" id="m-expense" style="color:var(--red)">$0</div></div>
     <div class="metric"><div class="metric-label">Balance</div><div class="metric-value" id="m-balance">$0</div></div>
   </div>
-
   <div class="card">
     <div class="card-title"><span>💰</span> Ingresos</div>
     <div id="income-list"></div>
@@ -140,7 +141,6 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
       <button class="add-btn" onclick="addEntry('income')">+</button>
     </div>
   </div>
-
   <div class="card">
     <div class="card-title"><span>🔒</span> Gastos fijos</div>
     <div id="fixed-list"></div>
@@ -150,7 +150,6 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
       <button class="add-btn" onclick="addEntry('fixed')">+</button>
     </div>
   </div>
-
   <div class="card">
     <div class="card-title"><span>🌊</span> Gastos variables</div>
     <div id="variable-list"></div>
@@ -164,63 +163,64 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 <!-- RUTINA -->
 <div class="section" id="sec-rutina">
-  <div class="page-header">
-    <h1>Rutina de hoy</h1>
-    <p id="rut-date"></p>
-  </div>
+  <div class="page-header"><h1>Rutina de hoy</h1><p id="rut-date"></p></div>
   <div id="areas-container"></div>
+</div>
+
+<!-- AHORROS -->
+<div class="section" id="sec-ahorros">
+  <div class="page-header"><h1>Ahorros</h1><p>Metas y progreso</p></div>
+  <div class="ahorro-metrics">
+    <div class="metric"><div class="metric-label">Total ahorrado</div><div class="metric-value" id="a-total" style="color:var(--purple)">$0</div></div>
+    <div class="metric"><div class="metric-label">Metas activas</div><div class="metric-value" id="a-metas" style="color:var(--blue)">0</div></div>
+  </div>
+  <div id="metas-container"></div>
+  <div class="card">
+    <div class="card-title"><span>🎯</span> Nueva meta</div>
+    <div class="nueva-meta">
+      <input type="text" id="meta-name" placeholder="Nombre de la meta (ej: viaje, celular, fondo)"/>
+      <div class="nueva-meta-row">
+        <input type="number" id="meta-objetivo" placeholder="Monto objetivo" min="0"/>
+        <input type="text" id="meta-emoji" placeholder="Emoji" style="max-width:70px;text-align:center"/>
+      </div>
+      <button onclick="addMeta()">+ Crear meta</button>
+    </div>
+  </div>
 </div>
 
 <!-- GRÁFICAS -->
 <div class="section" id="sec-graficas">
   <div class="page-header"><h1>Gráficas</h1><p>Vista consolidada</p></div>
-
   <div class="card">
-    <div class="card-title"><span>📊</span> Distribución de dinero</div>
+    <div class="card-title"><span>📊</span> Distribución</div>
     <div class="donut-wrap">
-      <div class="donut-chart">
-        <canvas id="donutChart" role="img" aria-label="Grafico circular de finanzas"></canvas>
-        <div class="donut-center">
-          <div class="donut-label">Balance</div>
-          <div class="donut-value" id="donut-center-val">$0</div>
-        </div>
+      <div class="donut-chart" style="height:120px">
+        <canvas id="donutChart" role="img" aria-label="Grafico circular finanzas"></canvas>
+        <div class="donut-center"><div class="donut-label">Balance</div><div class="donut-value" id="donut-center-val">$0</div></div>
       </div>
-      <div class="legend" id="donut-legend" style="flex-direction:column;gap:8px"></div>
+      <div class="legend" id="donut-legend" style="flex-direction:column"></div>
     </div>
   </div>
-
   <div class="card">
     <div class="card-title"><span>📈</span> Ingresos vs Gastos</div>
-    <div class="chart-wrap"><canvas id="barChart" role="img" aria-label="Grafico de barras ingresos vs gastos"></canvas></div>
+    <div class="chart-wrap"><canvas id="barChart" role="img" aria-label="Barras ingresos vs gastos"></canvas></div>
   </div>
-
   <div class="card">
-    <div class="card-title"><span>✅</span> Progreso de tareas</div>
+    <div class="card-title"><span>🎯</span> Progreso de metas</div>
+    <div id="metas-chart-list"></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span>✅</span> Tareas del día</div>
     <div id="task-progress"></div>
   </div>
 </div>
 
-<!-- RESUMEN -->
-<div class="section" id="sec-resumen">
-  <div class="page-header"><h1>Mi resumen</h1><p id="res-date"></p></div>
-
-  <div class="card">
-    <div class="card-title"><span>💡</span> Panorama financiero</div>
-    <div id="fin-summary"></div>
-  </div>
-  <div class="card">
-    <div class="card-title"><span>🗓</span> Tareas del día</div>
-    <div id="rut-summary"></div>
-  </div>
-  <button class="ai-btn" onclick="goAI()">✦ Análisis con IA</button>
-</div>
-
-<!-- NAVBAR -->
+<!-- NAV -->
 <div class="nav-bar">
   <button class="nav-btn active" onclick="switchTab('finanzas',this)"><span class="nav-icon">💰</span>Finanzas</button>
   <button class="nav-btn" onclick="switchTab('rutina',this)"><span class="nav-icon">🗓</span>Rutina</button>
+  <button class="nav-btn" onclick="switchTab('ahorros',this)"><span class="nav-icon">🎯</span>Ahorros</button>
   <button class="nav-btn" onclick="switchTab('graficas',this)"><span class="nav-icon">📊</span>Gráficas</button>
-  <button class="nav-btn" onclick="switchTab('resumen',this)"><span class="nav-icon">✦</span>Resumen</button>
 </div>
 
 <script>
@@ -231,27 +231,21 @@ const AREAS=[
   {id:'salud',label:'Salud / Deporte',emoji:'🏃',color:'#ff7ab8',border:'rgba(255,122,184,.3)',bg:'rgba(255,122,184,.07)',timeStart:'06:00',timeEnd:'07:00'},
 ];
 
-function loadState(){
-  try{return JSON.parse(localStorage.getItem('vidaApp')||'null');}catch{return null;}
-}
+function loadState(){try{return JSON.parse(localStorage.getItem('vidaApp')||'null');}catch{return null;}}
 function saveState(){localStorage.setItem('vidaApp',JSON.stringify(state));}
 
 const stored=loadState();
-const state=stored||{income:[],fixed:[],variable:[],tasks:{}};
+const state=stored||{income:[],fixed:[],variable:[],tasks:{},metas:[]};
+if(!state.metas)state.metas=[];
 AREAS.forEach(a=>{if(!state.tasks[a.id])state.tasks[a.id]=[];});
 
-// DATE
 const D=new Date();
-const DIAS=['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];
+const DIAS=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const dateStr=`${DIAS[D.getDay()]}, ${D.getDate()} de ${MESES[D.getMonth()]}`;
-['fin-date','rut-date','res-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=dateStr;});
+['fin-date','rut-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=dateStr;});
 
-function fmt(n){
-  const abs=Math.abs(Math.round(n));
-  const s=abs.toLocaleString('es-CO');
-  return (n<0?'-':'')+'$'+s;
-}
+function fmt(n){const abs=Math.abs(Math.round(n));return (n<0?'-':'')+'$'+abs.toLocaleString('es-CO');}
 
 function toast(msg){
   const t=document.getElementById('toast');
@@ -274,10 +268,14 @@ function calcTotals(){
 }
 
 function renderList(type){
-  const cfg={income:{id:'income-list',dot:'#00d4a0',badge:'Ingreso',bc:'rgba(0,212,160,.15)',tc:'#00d4a0'},fixed:{id:'fixed-list',dot:'#4a9eff',badge:'Fijo',bc:'rgba(74,158,255,.15)',tc:'#4a9eff'},variable:{id:'variable-list',dot:'#ff6b7a',badge:'Variable',bc:'rgba(255,107,122,.15)',tc:'#ff6b7a'}};
+  const cfg={
+    income:{id:'income-list',dot:'#00d4a0',badge:'Ingreso',bc:'rgba(0,212,160,.15)',tc:'#00d4a0'},
+    fixed:{id:'fixed-list',dot:'#4a9eff',badge:'Fijo',bc:'rgba(74,158,255,.15)',tc:'#4a9eff'},
+    variable:{id:'variable-list',dot:'#ff6b7a',badge:'Variable',bc:'rgba(255,107,122,.15)',tc:'#ff6b7a'}
+  };
   const c=cfg[type];
   const el=document.getElementById(c.id);el.innerHTML='';
-  if(!state[type].length){el.innerHTML=`<div class="empty">Sin registros aún</div>`;return;}
+  if(!state[type].length){el.innerHTML='<div class="empty">Sin registros aún</div>';return;}
   state[type].forEach((item,i)=>{
     const d=document.createElement('div');d.className='item';
     d.innerHTML=`<div class="item-dot" style="background:${c.dot}"></div><span class="item-name">${item.name}</span><span class="item-badge" style="background:${c.bc};color:${c.tc}">${c.badge}</span><span class="item-amount" style="color:${c.dot}">${fmt(item.amt)}</span><button class="item-del" onclick="removeEntry('${type}',${i})">×</button>`;
@@ -294,15 +292,12 @@ function addEntry(type){
   if(!name||isNaN(amt)||amt<=0){toast('Completa nombre y monto');return;}
   state[type].push({name,amt});
   nameEl.value='';amtEl.value='';
-  saveState();renderList(type);calcTotals();
-  toast('Agregado ✓');
+  saveState();renderList(type);calcTotals();toast('Agregado ✓');
 }
 
-function removeEntry(type,i){
-  state[type].splice(i,1);
-  saveState();renderList(type);calcTotals();
-}
+function removeEntry(type,i){state[type].splice(i,1);saveState();renderList(type);calcTotals();}
 
+// RUTINA
 function renderAreas(){
   const c=document.getElementById('areas-container');c.innerHTML='';
   AREAS.forEach(area=>{
@@ -316,13 +311,10 @@ function renderAreas(){
     div.innerHTML=`
       <div class="area-header">
         <div class="area-emoji">${area.emoji}</div>
-        <div class="area-info">
-          <div class="area-name">${area.label}</div>
-          <div class="area-time">${area.timeStart} – ${area.timeEnd}</div>
-        </div>
+        <div class="area-info"><div class="area-name">${area.label}</div><div class="area-time">${area.timeStart} – ${area.timeEnd}</div></div>
         <div class="area-badge" style="background:${area.bg};color:${area.color};border:1px solid ${area.border}">${done}/${total}</div>
       </div>
-      <div class="progress"><div class="progress-fill" style="width:${pct}%;background:${area.color}"></div></div>
+      <div class="progress" style="margin-bottom:10px"><div class="progress-fill" style="width:${pct}%;background:${area.color}"></div></div>
       <div id="tlist-${area.id}"></div>
       <div class="add-task">
         <input type="text" id="ti-${area.id}" placeholder="Agregar tarea..." onkeydown="if(event.key==='Enter')addTask('${area.id}')"/>
@@ -341,10 +333,7 @@ function renderTasks(areaId){
   if(!tasks.length){el.innerHTML='<div class="empty" style="padding:6px 0">Sin tareas aún</div>';return;}
   tasks.forEach((t,i)=>{
     const row=document.createElement('div');row.className='task-item';
-    row.innerHTML=`
-      <div class="task-cb ${t.done?'checked':''}" style="border-color:${t.done?area.color:area.color}" onclick="toggleTask('${areaId}',${i})"></div>
-      <span class="task-name${t.done?' done':''}" onclick="toggleTask('${areaId}',${i})">${t.name}</span>
-      <button class="task-del-btn" onclick="removeTask('${areaId}',${i})">×</button>`;
+    row.innerHTML=`<div class="task-cb ${t.done?'checked':''}" style="border-color:${area.color}" onclick="toggleTask('${areaId}',${i})"></div><span class="task-name${t.done?' done':''}" onclick="toggleTask('${areaId}',${i})">${t.name}</span><button class="task-del-btn" onclick="removeTask('${areaId}',${i})">×</button>`;
     el.appendChild(row);
   });
 }
@@ -356,30 +345,81 @@ function addTask(areaId){
   inp.value='';saveState();renderAreas();
 }
 
-function toggleTask(areaId,i){
-  state.tasks[areaId][i].done=!state.tasks[areaId][i].done;
-  saveState();renderAreas();updateGraficas();
+function toggleTask(areaId,i){state.tasks[areaId][i].done=!state.tasks[areaId][i].done;saveState();renderAreas();}
+function removeTask(areaId,i){state.tasks[areaId].splice(i,1);saveState();renderAreas();}
+
+// AHORROS
+function renderMetas(){
+  const c=document.getElementById('metas-container');c.innerHTML='';
+  let totalAhorrado=0;
+  state.metas.forEach((meta,i)=>{
+    totalAhorrado+=meta.ahorrado||0;
+    const pct=meta.objetivo>0?Math.min(100,Math.round((meta.ahorrado||0)/meta.objetivo*100)):0;
+    const completada=pct>=100;
+    const div=document.createElement('div');div.className='meta-card';
+    div.innerHTML=`
+      <div class="meta-header">
+        <div class="meta-emoji">${meta.emoji||'🎯'}</div>
+        <div class="meta-info">
+          <div class="meta-name">${meta.name}</div>
+          <div class="meta-amounts">${fmt(meta.ahorrado||0)} de ${fmt(meta.objetivo)}</div>
+        </div>
+        <div class="meta-pct">${pct}%</div>
+        <button class="del-meta" onclick="removeMeta(${i})">×</button>
+      </div>
+      <div class="meta-progress">
+        <div class="meta-bar"><div class="meta-fill" style="width:${pct}%;${completada?'background:var(--green)':''}"></div></div>
+      </div>
+      ${completada?'<div style="text-align:center;color:var(--green);font-size:13px;font-weight:600">¡Meta alcanzada! 🎉</div>':`
+      <div class="meta-actions">
+        <input type="number" id="abono-${i}" placeholder="Abonar monto" min="0"/>
+        <button class="abono-btn" onclick="abonar(${i})">+ Abonar</button>
+      </div>`}`;
+    c.appendChild(div);
+  });
+  document.getElementById('a-total').textContent=fmt(totalAhorrado);
+  document.getElementById('a-metas').textContent=state.metas.length;
+  if(!state.metas.length){
+    const empty=document.createElement('div');
+    empty.className='card';
+    empty.innerHTML='<div class="empty" style="padding:16px 0">Aún no tienes metas de ahorro.<br>Crea una abajo 👇</div>';
+    c.appendChild(empty);
+  }
 }
 
-function removeTask(areaId,i){
-  state.tasks[areaId].splice(i,1);
-  saveState();renderAreas();
+function addMeta(){
+  const name=document.getElementById('meta-name').value.trim();
+  const objetivo=parseFloat(document.getElementById('meta-objetivo').value);
+  const emoji=document.getElementById('meta-emoji').value.trim()||'🎯';
+  if(!name||isNaN(objetivo)||objetivo<=0){toast('Completa nombre y monto objetivo');return;}
+  state.metas.push({name,objetivo,ahorrado:0,emoji});
+  document.getElementById('meta-name').value='';
+  document.getElementById('meta-objetivo').value='';
+  document.getElementById('meta-emoji').value='';
+  saveState();renderMetas();toast('Meta creada ✓');
 }
 
+function abonar(i){
+  const inp=document.getElementById('abono-'+i);
+  const amt=parseFloat(inp.value);
+  if(isNaN(amt)||amt<=0){toast('Ingresa un monto válido');return;}
+  state.metas[i].ahorrado=(state.metas[i].ahorrado||0)+amt;
+  saveState();renderMetas();toast('Abono registrado ✓');
+}
+
+function removeMeta(i){state.metas.splice(i,1);saveState();renderMetas();}
+
+// GRÁFICAS
 let donutInst=null,barInst=null;
 function updateGraficas(){
-  const {inc,fix,vari,exp,bal}=calcTotals();
+  const {inc,fix,vari,bal}=calcTotals();
   // donut
-  const canvas=document.getElementById('donutChart');
-  if(canvas){
+  const dc=document.getElementById('donutChart');
+  if(dc){
     if(donutInst)donutInst.destroy();
-    const total=inc||1;
-    donutInst=new Chart(canvas,{
+    donutInst=new Chart(dc,{
       type:'doughnut',
-      data:{
-        labels:['Disponible','G. Fijos','G. Variables'],
-        datasets:[{data:[Math.max(bal,0),fix,vari],backgroundColor:['#00d4a0','#4a9eff','#ff6b7a'],borderWidth:0,hoverOffset:4}]
-      },
+      data:{labels:['Disponible','G. Fijos','G. Variables'],datasets:[{data:[Math.max(bal,0),fix,vari],backgroundColor:['#00d4a0','#4a9eff','#ff6b7a'],borderWidth:0,hoverOffset:4}]},
       options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.label+': '+fmt(ctx.raw)}}}}
     });
     document.getElementById('donut-center-val').textContent=fmt(bal);
@@ -393,16 +433,25 @@ function updateGraficas(){
     }
   }
   // bar
-  const barCanvas=document.getElementById('barChart');
-  if(barCanvas){
+  const bc=document.getElementById('barChart');
+  if(bc){
     if(barInst)barInst.destroy();
-    barInst=new Chart(barCanvas,{
+    barInst=new Chart(bc,{
       type:'bar',
-      data:{
-        labels:['Ingresos','G. Fijos','G. Variables','Balance'],
-        datasets:[{data:[inc,fix,vari,bal],backgroundColor:['#00d4a0','#4a9eff','#ff6b7a',bal>=0?'#00d4a0':'#ff6b7a'],borderRadius:8,borderSkipped:false}]
-      },
+      data:{labels:['Ingresos','G. Fijos','G. Variables','Balance'],datasets:[{data:[inc,fix,vari,bal],backgroundColor:['#00d4a0','#4a9eff','#ff6b7a',bal>=0?'#00d4a0':'#ff6b7a'],borderRadius:8,borderSkipped:false}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.raw)}}},scales:{y:{ticks:{callback:v=>fmt(v),color:'#6060a0'},grid:{color:'rgba(255,255,255,.05)'}},x:{ticks:{color:'#6060a0'},grid:{display:false}}}}
+    });
+  }
+  // metas chart
+  const mcEl=document.getElementById('metas-chart-list');
+  if(mcEl){
+    mcEl.innerHTML='';
+    if(!state.metas.length){mcEl.innerHTML='<div class="empty">Sin metas aún</div>';return;}
+    state.metas.forEach(meta=>{
+      const pct=meta.objetivo>0?Math.min(100,Math.round((meta.ahorrado||0)/meta.objetivo*100)):0;
+      const row=document.createElement('div');row.style.cssText='margin-bottom:14px';
+      row.innerHTML=`<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span>${meta.emoji||'🎯'} ${meta.name}</span><span style="color:var(--purple);font-weight:600">${pct}%</span></div><div class="meta-bar"><div class="meta-fill" style="width:${pct}%"></div></div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px"><span>${fmt(meta.ahorrado||0)}</span><span>${fmt(meta.objetivo)}</span></div>`;
+      mcEl.appendChild(row);
     });
   }
   // task progress
@@ -414,50 +463,12 @@ function updateGraficas(){
       const done=tasks.filter(t=>t.done).length;
       const total=tasks.length;
       const pct=total?Math.round(done/total*100):0;
-      const row=document.createElement('div');row.className='sum-row';
-      row.innerHTML=`<div class="sum-area"><span>${area.emoji}</span><span>${area.label}</span></div><div style="flex:1;margin:0 12px"><div class="progress"><div class="progress-fill" style="width:${pct}%;background:${area.color}"></div></div></div><div class="sum-pct" style="color:${area.color}">${done}/${total}</div>`;
+      const row=document.createElement('div');row.style.cssText='margin-bottom:12px';
+      row.innerHTML=`<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>${area.emoji} ${area.label}</span><span style="color:${area.color};font-weight:600">${done}/${total}</span></div><div class="progress"><div class="progress-fill" style="width:${pct}%;background:${area.color}"></div></div>`;
       tpEl.appendChild(row);
     });
     if(!AREAS.some(a=>(state.tasks[a.id]||[]).length)){tpEl.innerHTML='<div class="empty">Agrega tareas en Rutina</div>';}
   }
-  updateResumen();
-}
-
-function updateResumen(){
-  const {inc,fix,vari,exp,bal}=calcTotals();
-  const finEl=document.getElementById('fin-summary');
-  if(finEl){
-    const rows=[
-      ['Ingresos totales',fmt(inc),'#00d4a0'],
-      ['Gastos fijos',fmt(fix),'#4a9eff'],
-      ['Gastos variables',fmt(vari),'#ff6b7a'],
-      ['Balance disponible',fmt(bal),bal>=0?'#00d4a0':'#ff6b7a'],
-    ];
-    finEl.innerHTML=rows.map(([l,v,c])=>`<div class="sum-row"><span>${l}</span><span style="font-weight:600;color:${c}">${v}</span></div>`).join('');
-  }
-  const rutEl=document.getElementById('rut-summary');
-  if(rutEl){
-    rutEl.innerHTML='';
-    AREAS.forEach(area=>{
-      const tasks=state.tasks[area.id]||[];
-      const done=tasks.filter(t=>t.done).length;
-      const total=tasks.length;
-      const pct=total?Math.round(done/total*100):0;
-      if(!total)return;
-      const row=document.createElement('div');row.className='sum-row';
-      row.innerHTML=`<div class="sum-area"><span>${area.emoji}</span><span>${area.label}</span></div><div style="flex:1;margin:0 12px"><div class="progress"><div class="progress-fill" style="width:${pct}%;background:${area.color}"></div></div></div><span style="font-size:13px;color:var(--text2)">${pct}%</span>`;
-      rutEl.appendChild(row);
-    });
-    if(!AREAS.some(a=>(state.tasks[a.id]||[]).length)){rutEl.innerHTML='<div class="empty">Sin tareas registradas</div>';}
-  }
-}
-
-function goAI(){
-  const {inc,fix,vari,bal}=calcTotals();
-  const totalTasks=AREAS.reduce((s,a)=>s+(state.tasks[a.id]||[]).length,0);
-  const doneTasks=AREAS.reduce((s,a)=>s+(state.tasks[a.id]||[]).filter(t=>t.done).length,0);
-  const msg=`Analiza mis finanzas y rutina:\n\nFinanzas:\n- Ingresos: ${fmt(inc)}\n- Gastos fijos: ${fmt(fix)}\n- Gastos variables: ${fmt(vari)}\n- Balance disponible: ${fmt(bal)}\n\nRutina de hoy:\n- Tareas completadas: ${doneTasks} de ${totalTasks}\n${AREAS.map(a=>{const t=state.tasks[a.id]||[];return `- ${a.label}: ${t.filter(x=>x.done).length}/${t.length} tareas`;}).join('\n')}\n\nDame recomendaciones concretas y personalizadas.`;
-  if(typeof sendPrompt==='function')sendPrompt(msg);
 }
 
 function switchTab(name,btn){
@@ -465,19 +476,18 @@ function switchTab(name,btn){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('sec-'+name).classList.add('active');
   btn.classList.add('active');
-  if(name==='graficas'||name==='resumen'){updateGraficas();}
+  if(name==='graficas')updateGraficas();
+  if(name==='ahorros')renderMetas();
 }
 
 // INIT
 ['income','fixed','variable'].forEach(renderList);
 calcTotals();
 renderAreas();
+renderMetas();
 
-// SW registration
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
-  });
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 }
 </script>
 </body>
