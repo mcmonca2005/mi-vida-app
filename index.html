@@ -174,8 +174,27 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .nm-emoji{max-width:64px;text-align:center}
 .nm-btn{width:100%;background:var(--purple);border:none;border-radius:var(--r-sm);color:#fff;font-size:14px;font-weight:700;padding:12px;cursor:pointer;margin-top:4px}
 
-/* GRAFICAS */
-.graf-card{margin:0 14px 12px;background:var(--bg2);border:1px solid var(--bg4);border-radius:var(--r);padding:16px}
+/* BOLSILLOS */
+.bolsillo-card{margin:0 14px 12px;border-radius:var(--r);padding:16px;border:1px solid}
+.bolsillo-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.bolsillo-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.bolsillo-info{flex:1}
+.bolsillo-name{font-size:15px;font-weight:700}
+.bolsillo-amounts{font-size:12px;color:var(--text2);margin-top:2px}
+.bolsillo-pct{font-size:16px;font-weight:800}
+.bolsillo-bar{height:8px;border-radius:20px;overflow:hidden;margin-bottom:12px}
+.bolsillo-bar-bg{width:100%;height:100%;background:rgba(255,255,255,.08);border-radius:20px;position:relative}
+.bolsillo-bar-fill{height:100%;border-radius:20px;transition:width .4s}
+.bolsillo-actions{display:flex;gap:8px}
+.b-action-btn{flex:1;padding:9px;border-radius:var(--r-sm);border:none;font-size:13px;font-weight:600;cursor:pointer}
+.b-asignar{background:var(--green-bg);color:var(--green)}
+.b-gastar{background:var(--red-bg);color:var(--red)}
+.b-del{background:var(--bg3);color:var(--text3);flex:0;padding:9px 14px}
+
+/* MODAL BOLSILLO */
+.b-modal-meta{display:flex;align-items:center;gap:10px;padding:12px 20px;background:var(--bg3);margin:0 0 4px;font-size:14px;font-weight:600}
+
+margin:0 14px 12px;background:var(--bg2);border:1px solid var(--bg4);border-radius:var(--r);padding:16px}
 .graf-title{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px}
 .chart-wrap{position:relative;width:100%;height:190px}
 .donut-wrap{display:flex;align-items:center;gap:16px}
@@ -243,9 +262,21 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
       </div>
       <div class="bc-avatar" id="avatar-btn" onclick="signOut()">J</div>
     </div>
-    <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Balance disponible</div>
-    <div class="bc-balance pos" id="bc-balance">$0</div>
-    <div class="bc-pills">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:4px">
+      <div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Total</div>
+        <div style="font-size:20px;font-weight:800;color:var(--text)" id="bc-total">$0</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Disponible</div>
+        <div style="font-size:20px;font-weight:800" id="bc-balance">$0</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Ahorros</div>
+        <div style="font-size:20px;font-weight:800;color:var(--purple)" id="bc-savings">$0</div>
+      </div>
+    </div>
+    <div class="bc-pills" style="margin-top:14px">
       <div class="bc-pill"><div class="pill-dot" style="background:var(--green)"></div>Ingresos <b id="pill-inc">$0</b></div>
       <div class="bc-pill"><div class="pill-dot" style="background:var(--red)"></div>Gastos <b id="pill-exp">$0</b></div>
     </div>
@@ -286,6 +317,39 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   </div>
 </div>
 
+<!-- BOLSILLOS -->
+<div class="screen" id="scr-bolsillos">
+  <div class="page-top">
+    <div><h1>Bolsillos</h1><div class="page-top-sub">Distribuye tu dinero</div></div>
+    <div style="text-align:right"><div style="font-size:11px;color:var(--text3)">Sin asignar</div><div style="font-size:20px;font-weight:800;color:var(--amber)" id="b-libre">$0</div></div>
+  </div>
+  <!-- RESUMEN BOLSILLOS -->
+  <div style="margin:0 14px 14px;background:var(--bg2);border:1px solid var(--bg4);border-radius:var(--r);padding:16px">
+    <div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">📊 Distribución</div>
+    <div style="position:relative;height:10px;border-radius:20px;overflow:hidden;background:var(--bg4);margin-bottom:10px" id="b-bar-total"></div>
+    <div id="b-leyenda" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+  </div>
+  <!-- BOLSILLOS LIST -->
+  <div id="bolsillos-container"></div>
+  <!-- NUEVO BOLSILLO -->
+  <div style="margin:0 14px 12px;background:var(--bg2);border:1px solid var(--bg4);border-radius:var(--r);padding:16px">
+    <div style="font-size:13px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">+ Nuevo bolsillo</div>
+    <input class="nm-input" id="b-name" placeholder="Nombre (ej: mercado, transporte, salidas)"/>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <input class="nm-input" id="b-emoji" placeholder="🛒" style="max-width:64px;text-align:center;margin-bottom:0"/>
+      <select id="b-color" style="flex:1;background:var(--bg3);border:1.5px solid var(--bg4);border-radius:var(--r-sm);padding:10px 14px;color:var(--text);font-size:14px;outline:none">
+        <option value="#00e5a0">Verde</option>
+        <option value="#5aa0ff">Azul</option>
+        <option value="#ff5577">Rojo</option>
+        <option value="#ffb84d">Naranja</option>
+        <option value="#c084ff">Morado</option>
+        <option value="#ff7eb8">Rosa</option>
+      </select>
+    </div>
+    <button class="nm-btn" style="background:var(--amber);color:#000" onclick="addBolsillo()">Crear bolsillo</button>
+  </div>
+</div>
+
 <!-- GRAFICAS -->
 <div class="screen" id="scr-graficas">
   <div class="page-top"><h1>Gráficas</h1></div>
@@ -309,6 +373,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div class="nav">
   <button class="nb active" onclick="switchScreen('inicio',this)"><span class="nb-icon">🏠</span>Inicio</button>
   <button class="nb" onclick="switchScreen('rutina',this)"><span class="nb-icon">🗓</span>Rutina</button>
+  <button class="nb" onclick="switchScreen('bolsillos',this)"><span class="nb-icon">👛</span>Bolsillos</button>
   <button class="nb" onclick="switchScreen('ahorros',this)"><span class="nb-icon">🎯</span>Ahorros</button>
   <button class="nb" onclick="switchScreen('graficas',this)"><span class="nb-icon">📊</span>Gráficas</button>
 </div>
@@ -350,9 +415,11 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div class="modal">
   <div class="modal-handle"></div>
   <div class="modal-header">
-    <div class="modal-title" id="abono-title">Abonar</div>
+    <div class="modal-title" id="abono-title">Abonar a meta</div>
     <button class="modal-close" onclick="closeAbono()">×</button>
   </div>
+  <!-- SELECTOR DE META -->
+  <div id="meta-selector" style="padding:0 20px 14px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch"></div>
   <div class="abono-amt" id="abono-display">$0</div>
   <div class="numpad">
     <button class="numpad-key" onclick="abonoNumpad('1')">1</button><button class="numpad-key" onclick="abonoNumpad('2')">2</button><button class="numpad-key" onclick="abonoNumpad('3')">3</button>
@@ -474,7 +541,7 @@ function setupRealtimeSync(uid){
       state.variable=d.variable||[];
       state.tasks=d.tasks||{};
       state.metas=d.metas||[];
-      AREAS.forEach(a=>{if(!state.tasks[a.id])state.tasks[a.id]=[];});
+      if(!state.bolsillos)state.bolsillos=[];
     }
     renderAll();
   });
@@ -486,7 +553,7 @@ async function saveToCloud(){
   try{
     await setDoc(doc(db,'users',currentUser.uid),{
       income:state.income,fixed:state.fixed,variable:state.variable,
-      tasks:state.tasks,metas:state.metas,updatedAt:Date.now()
+      tasks:state.tasks,metas:state.metas,bolsillos:state.bolsillos,updatedAt:Date.now()
     });
   }catch(e){toast('Error al guardar');}
   setTimeout(()=>{saving=false;},1000);
@@ -498,11 +565,15 @@ function calcTotals(){
   const fix=state.fixed.reduce((s,i)=>s+i.amt,0);
   const vari=state.variable.reduce((s,i)=>s+i.amt,0);
   const exp=fix+vari;const bal=inc-exp;
+  const savings=state.metas.reduce((s,m)=>s+(m.ahorrado||0),0);
+  const total=inc;
   const bEl=document.getElementById('bc-balance');
-  if(bEl){bEl.textContent=fmt(bal);bEl.className='bc-balance '+(bal>=0?'pos':'neg');}
+  if(bEl){bEl.textContent=fmt(bal);bEl.style.color=bal>=0?'var(--green)':'var(--red)';}
+  const tEl=document.getElementById('bc-total');if(tEl)tEl.textContent=fmt(total);
+  const sEl=document.getElementById('bc-savings');if(sEl)sEl.textContent=fmt(savings);
   const pi=document.getElementById('pill-inc');if(pi)pi.textContent=fmt(inc);
   const pe=document.getElementById('pill-exp');if(pe)pe.textContent=fmt(exp);
-  return{inc,fix,vari,exp,bal};
+  return{inc,fix,vari,exp,bal,savings};
 }
 
 function renderRecent(){
@@ -577,11 +648,36 @@ window.confirmEntry=()=>{
 let abonoIdx=-1;let abonoStr='';
 
 window.openAbono=(i)=>{
-  abonoIdx=i;abonoStr='';
-  document.getElementById('abono-title').textContent='🎯 '+state.metas[i].name;
+  if(state.metas.length===0){
+    switchScreen('ahorros',document.querySelectorAll('.nb')[2]);
+    toast('Primero crea una meta de ahorro 🎯');return;
+  }
+  abonoIdx=i>=0?i:0;abonoStr='';
+  // render selector
+  const sel=document.getElementById('meta-selector');
+  if(sel){
+    sel.innerHTML='';
+    state.metas.forEach((m,idx)=>{
+      const chip=document.createElement('div');
+      chip.style.cssText=`flex-shrink:0;padding:8px 14px;border-radius:20px;border:1.5px solid ${idx===abonoIdx?'var(--purple)':'var(--bg4)'};background:${idx===abonoIdx?'var(--purple-bg)':'var(--bg3)'};color:${idx===abonoIdx?'var(--purple)':'var(--text2)'};font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap`;
+      chip.textContent=`${m.emoji||'🎯'} ${m.name}`;
+      chip.onclick=()=>{abonoIdx=idx;renderAbonoSelector();};
+      sel.appendChild(chip);
+    });
+  }
+  document.getElementById('abono-title').textContent='Abonar a meta';
   document.getElementById('abono-display').textContent='$0';
   document.getElementById('abono-overlay').classList.add('open');
 };
+
+function renderAbonoSelector(){
+  const sel=document.getElementById('meta-selector');if(!sel)return;
+  sel.querySelectorAll('div').forEach((chip,idx)=>{
+    chip.style.borderColor=idx===abonoIdx?'var(--purple)':'var(--bg4)';
+    chip.style.background=idx===abonoIdx?'var(--purple-bg)':'var(--bg3)';
+    chip.style.color=idx===abonoIdx?'var(--purple)':'var(--text2)';
+  });
+}
 window.closeAbono=()=>document.getElementById('abono-overlay').classList.remove('open');
 window.abonoNumpad=(k)=>{
   if(k==='del')abonoStr=abonoStr.slice(0,-1);
@@ -697,8 +793,153 @@ function updateGraficas(){
   if(gt){gt.innerHTML='';AREAS.forEach(area=>{const tasks=state.tasks[area.id]||[];const done=tasks.filter(t=>t.done).length;const total=tasks.length;const pct=total?Math.round(done/total*100):0;const row=document.createElement('div');row.style.cssText='margin-bottom:12px';row.innerHTML=`<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>${area.emoji} ${area.label}</span><span style="color:${area.color};font-weight:600">${done}/${total}</span></div><div class="area-prog"><div class="area-fill" style="width:${pct}%;background:${area.color}"></div></div>`;gt.appendChild(row);});}
 }
 
-// NAVIGATION
+// ─── BOLSILLOS ───────────────────────────────────────────
+function calcLibre(){
+  const inc=state.income.reduce((s,i)=>s+i.amt,0);
+  const totalAsig=state.bolsillos.reduce((s,b)=>s+b.asignado,0);
+  return inc-totalAsig;
+}
+
+function renderBolsillos(){
+  const c=document.getElementById('bolsillos-container');if(!c)return;c.innerHTML='';
+  const inc=state.income.reduce((s,i)=>s+i.amt,0);
+  const libre=calcLibre();
+  const libreEl=document.getElementById('b-libre');if(libreEl)libreEl.textContent=fmt(libre);
+
+  // barra total
+  const barTotal=document.getElementById('b-bar-total');
+  const ley=document.getElementById('b-leyenda');
+  if(barTotal&&inc>0){
+    barTotal.innerHTML='';
+    state.bolsillos.forEach(b=>{
+      const pct=Math.min(100,(b.asignado/inc)*100);
+      const seg=document.createElement('div');
+      seg.style.cssText=`height:100%;width:${pct}%;background:${b.color};display:inline-block;`;
+      barTotal.appendChild(seg);
+    });
+  }
+  if(ley){
+    ley.innerHTML='';
+    state.bolsillos.forEach(b=>{
+      const item=document.createElement('div');
+      item.style.cssText='display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)';
+      item.innerHTML=`<div style="width:10px;height:10px;border-radius:3px;background:${b.color}"></div>${b.emoji||'👛'} ${b.name}: <b style="color:var(--text)">${fmt(b.asignado)}</b>`;
+      ley.appendChild(item);
+    });
+  }
+
+  if(!state.bolsillos.length){
+    c.innerHTML='<div class="empty-state">Sin bolsillos aún.<br>Crea uno abajo para distribuir tu dinero 👛</div>';return;
+  }
+
+  state.bolsillos.forEach((b,i)=>{
+    const gastado=b.gastado||0;
+    const pct=b.asignado>0?Math.min(100,Math.round(gastado/b.asignado*100)):0;
+    const restante=b.asignado-gastado;
+    const color=pct>=90?'var(--red)':pct>=70?'var(--amber)':b.color;
+    const card=document.createElement('div');card.className='bolsillo-card';
+    card.style.background=`${b.color}10`;card.style.borderColor=`${b.color}40`;
+    card.innerHTML=`
+      <div class="bolsillo-top">
+        <div class="bolsillo-icon" style="background:${b.color}20">${b.emoji||'👛'}</div>
+        <div class="bolsillo-info">
+          <div class="bolsillo-name">${b.name}</div>
+          <div class="bolsillo-amounts">Gastado: ${fmt(gastado)} · Resta: <b style="color:${color}">${fmt(restante)}</b></div>
+        </div>
+        <div class="bolsillo-pct" style="color:${color}">${pct}%</div>
+      </div>
+      <div class="bolsillo-bar"><div class="bolsillo-bar-bg"><div class="bolsillo-bar-fill" style="width:${pct}%;background:${color}"></div></div></div>
+      <div class="bolsillo-actions">
+        <button class="b-action-btn b-asignar" onclick="openBolsilloModal(${i},'asignar')">+ Asignar</button>
+        <button class="b-action-btn b-gastar" onclick="openBolsilloModal(${i},'gastar')">− Gastar</button>
+        <button class="b-action-btn b-del" onclick="deleteBolsillo(${i})">×</button>
+      </div>`;
+    c.appendChild(card);
+  });
+}
+
+window.addBolsillo=()=>{
+  const name=document.getElementById('b-name').value.trim();
+  const emoji=document.getElementById('b-emoji').value.trim()||'👛';
+  const color=document.getElementById('b-color').value;
+  if(!name){toast('Ponle un nombre al bolsillo');return;}
+  state.bolsillos.push({name,emoji,color,asignado:0,gastado:0});
+  document.getElementById('b-name').value='';
+  document.getElementById('b-emoji').value='';
+  saveToCloud();renderBolsillos();toast('Bolsillo creado ✓');
+};
+
+window.deleteBolsillo=(i)=>{
+  if(!confirm(`¿Eliminar bolsillo "${state.bolsillos[i].name}"?`))return;
+  state.bolsillos.splice(i,1);saveToCloud();renderBolsillos();
+};
+
+// Modal bolsillo rápido (reutiliza abono overlay con lógica diferente)
+let bIdx=-1;let bAccion='';let bStr='';
+
+window.openBolsilloModal=(i,accion)=>{
+  bIdx=i;bAccion=accion;bStr='';
+  const b=state.bolsillos[i];
+  document.getElementById('abono-title').textContent=accion==='asignar'?`+ Asignar a ${b.emoji} ${b.name}`:`− Gastar en ${b.emoji} ${b.name}`;
+  document.getElementById('abono-display').textContent='$0';
+  document.getElementById('abono-display').style.color=accion==='asignar'?'var(--green)':'var(--red)';
+  const sel=document.getElementById('meta-selector');if(sel)sel.innerHTML='';
+  // Override confirm
+  window._bolsilloMode=true;
+  document.getElementById('abono-overlay').classList.add('open');
+};
+
+// Override confirmAbono para bolsillos
+const _origConfirmAbono=window.confirmAbono;
+window.confirmAbono=()=>{
+  if(window._bolsilloMode){
+    const amt=parseInt(abonoStr||bStr||'0',10);
+    if(!amt){toast('Ingresa un monto');return;}
+    const b=state.bolsillos[bIdx];
+    if(bAccion==='asignar'){
+      const libre=calcLibre();
+      if(amt>libre){toast(`Solo tienes ${fmt(libre)} sin asignar`);return;}
+      b.asignado+=amt;
+    } else {
+      if(amt>b.asignado-b.gastado){toast('No hay suficiente en este bolsillo');return;}
+      b.gastado+=amt;
+      state.variable.push({name:`Gasto ${b.name}`,amt,cat:b.name,ts:Date.now()});
+    }
+    saveToCloud();renderBolsillos();renderAll();
+    closeAbono();window._bolsilloMode=false;
+    toast(bAccion==='asignar'?`${fmt(amt)} asignado a ${b.name} ✓`:`${fmt(amt)} gastado de ${b.name} ✓`);
+    return;
+  }
+  // original
+  const amt=parseInt(abonoStr||'0',10);
+  if(!amt||abonoIdx<0){toast('Ingresa un monto');return;}
+  state.metas[abonoIdx].ahorrado=(state.metas[abonoIdx].ahorrado||0)+amt;
+  saveToCloud();renderMetas();renderMetasMini();closeAbono();
+  const pct=Math.min(100,Math.round(state.metas[abonoIdx].ahorrado/state.metas[abonoIdx].objetivo*100));
+  toast('Abono ✓ — '+pct+'% completado');
+  if(pct>=100)setTimeout(()=>toast('🎉 ¡Meta alcanzada!'),2300);
+};
+
+// sync abonoStr con bStr
+const _origAbonoNumpad=window.abonoNumpad;
+window.abonoNumpad=(k)=>{
+  if(k==='del'){abonoStr=abonoStr.slice(0,-1);bStr=abonoStr;}
+  else if(abonoStr.length<10){abonoStr+=k;bStr=abonoStr;}
+  document.getElementById('abono-display').textContent=fmtRaw(abonoStr||'0');
+};
+
+// Nav bolsillos
 window.switchScreen=(name,btn)=>{
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('scr-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='graficas')updateGraficas();
+  if(name==='ahorros')renderMetas();
+  if(name==='bolsillos')renderBolsillos();
+};
+
+
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   document.getElementById('scr-'+name).classList.add('active');
@@ -708,7 +949,7 @@ window.switchScreen=(name,btn)=>{
 };
 
 function renderAll(){
-  calcTotals();renderRecent();renderMetasMini();renderAreas();
+  calcTotals();renderRecent();renderMetasMini();renderAreas();renderBolsillos();
 }
 
 if('serviceWorker' in navigator){
