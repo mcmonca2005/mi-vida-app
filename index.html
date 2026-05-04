@@ -1,4 +1,209 @@
-<!DOCTYPE html>
+// ─── PRESUPUESTO INTELIGENTE ─────────────────────────────
+function getMesActual(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
+const MESES_NOMBRES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function getGastadoCategoria(catName){
+  const mes=getMesActual();
+  return state.variable.filter(g=>{
+    const gMes=g.ts?`${new Date(g.ts).getFullYear()}-${String(new Date(g.ts).getMonth()+1).padStart(2,'0')}`:mes;
+    return (g.cat||'').toLowerCase()===catName.toLowerCase()&&gMes===mes;
+  }).reduce((s,g)=>s+g.amt,0);
+}
+
+function calcScore(inc,gastosFijos,gastosVariables,ahorros){
+  if(!inc)return{score:0,label:'Sin datos',color:'var(--text3)',desc:'Registra tus ingresos para comenzar'};
+  const pNec=(gastosFijos+gastosVariables)/inc*100;
+  const pAho=ahorros/inc*100;
+  let score=100;
+  // penalizaciones
+  if(pNec>80)score-=40;else if(pNec>65)score-=20;else if(pNec>50)score-=10;
+  if(pAho<5)score-=30;else if(pAho<10)score-=15;else if(pAho<20)score-=5;
+  if(pNec+pAho>100)score-=20;
+  score=Math.max(0,Math.min(100,Math.round(score)));
+  let label,color,desc;
+  if(score>=80){label='Excelente 🌟';color='var(--green)';desc='Tus finanzas están muy bien organizadas. Sigue así.';}
+  else if(score>=60){label='Bueno 👍';color='var(--blue)';desc='Vas por buen camino. Pequeños ajustes pueden mejorar tu situación.';}
+  else if(score>=40){label='Regular ⚡';color='var(--amber)';desc='Hay oportunidades de mejora. Revisa tus gastos variables.';}
+  else{label='Crítico ⚠️';color='var(--red)';desc='Tus gastos superan lo recomendado. Es momento de actuar.';}
+  return{score,label,color,desc};
+}
+
+let scoreChartInst=null;
+function renderScoreChart(score,color){
+  const canvas=document.getElementById('scoreChart');if(!canvas)return;
+  if(scoreChartInst)scoreChartInst.destroy();
+  const colorHex=score>=80?'#00e5a0':score>=60?'#5aa0ff':score>=40?'#ffb84d':'#ff5577';
+  scoreChartInst=new Chart(canvas,{
+    type:'doughnut',
+    data:{datasets:[{data:[score,100-score],backgroundColor:[colorHex,'rgba(255,255,255,.06)'],borderWidth:0}]},
+    options:{responsive:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:false}}}
+  });
+}
+
+function renderPresupuesto(){
+  const d=new Date();
+  const mesEl=document.getElementById('pres-mes');
+  if(mesEl)mesEl.textContent=`${MESES_NOMBRES[d.getMonth()]} ${d.getFullYear()}`;
+
+  const inc=state.nominal||state.income.reduce((s,i)=>s+i.amt,0);
+  const gastosFijos=state.fixed.filter(i=>i.cat!=='Ahorro').reduce((s,i)=>s+i.amt,0);
+  const gastosVariables=state.variable.reduce((s,i)=>s+i.amt,0);
+  const ahorros=state.metas.reduce((s,m)=>s+(m.ahorrado||0),0);
+
+  // BASE INGRESO
+  const ibEl=document.getElementById('pres-ingreso-base');
+  if(ibEl)ibEl.textContent=inc?`Base: ${fmt(inc)}`:'Sin ingresos registrados';
+
+  // SCORE
+  const {score,label,color,desc}=calcScore(inc,gastosFijos,gastosVariables,ahorros);
+  const sNum=document.getElementById('score-num');if(sNum){sNum.textContent=score;sNum.style.color=color;}
+  const sLbl=document.getElementById('score-label');if(sLbl){sLbl.textContent=label;sLbl.style.color=color;}
+  const sDesc=document.getElementById('score-desc');if(sDesc)sDesc.textContent=desc;
+  renderScoreChart(score,color);
+
+  // MÉTRICAS SCORE
+  const smEl=document.getElementById('score-metrics');
+  if(smEl&&inc){
+    const pNec=Math.round((gastosFijos+gastosVariables)/inc*100);
+    const pAho=Math.round(ahorros/inc*100);
+    const pLib=Math.max(0,100-pNec-pAho);
+    smEl.innerHTML=`
+      <div class="score-metric"><div class="score-metric-val" style="color:var(--red)">${pNec}%</div><div class="score-metric-lbl">En gastos</div></div>
+      <div class="score-metric"><div class="score-metric-val" style="color:var(--purple)">${pAho}%</div><div class="score-metric-lbl">En ahorros</div></div>
+      <div class="score-metric"><div class="score-metric-val" style="color:var(--green)">${pLib}%</div><div class="score-metric-lbl">Libre</div></div>`;
+  }
+
+  // REGLA 50/30/20
+  const reglaCont=document.getElementById('regla-cards');
+  if(reglaCont&&inc){
+    const ideal50=inc*0.5;const ideal30=inc*0.3;const ideal20=inc*0.2;
+    const real50=gastosFijos;const real30=gastosVariables;const real20=ahorros;
+    const reglas=[
+      {nombre:'Necesidades básicas',sub:'Gastos fijos (arriendo, servicios...)',ideal:ideal50,real:real50,color:'#5aa0ff',pct:50},
+      {nombre:'Estilo de vida',sub:'Gastos variables (mercado, salidas...)',ideal:ideal30,real:real30,color:'#ff7eb8',pct:30},
+      {nombre:'Ahorro e inversión',sub:'Metas de ahorro y fondo emergencia',ideal:ideal20,real:real20,color:'#c084ff',pct:20},
+    ];
+    reglaCont.innerHTML='';
+    reglas.forEach(r=>{
+      const pctReal=Math.min(130,Math.round(r.real/r.ideal*100));
+      const excede=r.real>r.ideal;
+      const bajo=r.real<r.ideal*0.5;
+      const div=document.createElement('div');div.className='regla-row';
+      div.innerHTML=`
+        <div class="regla-header">
+          <div><div class="regla-name">${r.nombre}</div><div style="font-size:11px;color:var(--text3)">${r.sub}</div></div>
+          <div style="text-align:right">
+            <div style="font-size:13px;font-weight:700;color:${excede?'var(--red)':bajo?'var(--amber)':r.color}">${fmt(r.real)}</div>
+            <div style="font-size:10px;color:var(--text3)">ideal: ${fmt(r.ideal)}</div>
+          </div>
+        </div>
+        <div class="regla-bar-wrap">
+          <div class="regla-bar-ideal" style="width:100%;background:${r.color}"></div>
+          <div class="regla-bar-real" style="width:${Math.min(100,pctReal)}%;background:${excede?'var(--red)':r.color}"></div>
+          <div class="regla-marker" style="left:100%"></div>
+        </div>
+        <div class="regla-tags">
+          <span class="regla-tag" style="background:${r.color}20;color:${r.color}">Meta ${r.pct}%: ${fmt(r.ideal)}</span>
+          ${excede?`<span class="regla-tag" style="background:var(--red-bg);color:var(--red)">⚠ Excede en ${fmt(r.real-r.ideal)}</span>`:''}
+          ${bajo?`<span class="regla-tag" style="background:var(--amber-bg);color:var(--amber)">↓ Bajo el ideal</span>`:''}
+        </div>`;
+      reglaCont.appendChild(div);
+    });
+  } else if(reglaCont){
+    reglaCont.innerHTML='<div class="empty-state" style="padding:16px 0">Registra ingresos para ver tu distribución ideal</div>';
+  }
+
+  // ALERTAS
+  const alertEl=document.getElementById('pres-alertas');
+  if(alertEl){
+    alertEl.innerHTML='';
+    (state.presupuesto||[]).forEach(c=>{
+      const g=getGastadoCategoria(c.name);
+      const p=c.limite>0?Math.round(g/c.limite*100):0;
+      if(p>=80){
+        const banner=document.createElement('div');
+        banner.className=`alert-banner ${p>=100?'danger':'urgent'}`;
+        banner.innerHTML=`<div class="alert-icon">${p>=100?'🔴':'⚡'}</div><div class="alert-text"><b>${c.emoji||'📋'} ${c.name} — ${p}% usado</b>${p>=100?`Excediste el límite en ${fmt(g-c.limite)}`:`Te quedan ${fmt(c.limite-g)} de ${fmt(c.limite)}`}</div>`;
+        alertEl.appendChild(banner);
+      }
+    });
+  }
+
+  // CATEGORÍAS
+  const catsCont=document.getElementById('pres-categorias');
+  if(catsCont){
+    catsCont.innerHTML='';
+    if(!(state.presupuesto||[]).length){
+      catsCont.innerHTML='<div class="empty-state">Sin categorías.<br>Crea una abajo 📋</div>';
+    } else {
+      state.presupuesto.forEach((cat,i)=>{
+        const gastado=getGastadoCategoria(cat.name);
+        const pct=cat.limite>0?Math.min(100,Math.round(gastado/cat.limite*100)):0;
+        const resta=cat.limite-gastado;
+        const col=pct>=100?'var(--red)':pct>=80?'var(--amber)':'var(--green)';
+        const card=document.createElement('div');
+        card.className=`pcat-card${pct>=100?' danger':pct>=80?' warning':''}`;
+        card.innerHTML=`
+          <div class="pcat-top">
+            <div class="pcat-icon">${cat.emoji||'📋'}</div>
+            <div class="pcat-info"><div class="pcat-name">${cat.name}</div><div class="pcat-amounts">Gastado: ${fmt(gastado)} · Límite: ${fmt(cat.limite)}</div></div>
+            <div class="pcat-pct" style="color:${col}">${pct}%</div>
+          </div>
+          <div class="pcat-bar"><div class="pcat-fill" style="width:${pct}%;background:${col}"></div></div>
+          <div class="pcat-bottom">
+            <span class="pcat-tag" style="background:${pct>=100?'var(--red-bg)':pct>=80?'var(--amber-bg)':'var(--green-bg)'};color:${col}">
+              ${pct>=100?'⚠️ Excedido':pct>=80?'⚡ Casi al límite':'✓ Resta '+fmt(resta)}
+            </span>
+            <button class="pcat-del" onclick="deletePresupuesto(${i})">×</button>
+          </div>`;
+        catsCont.appendChild(card);
+      });
+    }
+  }
+
+  // RECOMENDACIONES IA (generación automática local)
+  generarRecomendacionesIA(inc,gastosFijos,gastosVariables,ahorros,score);
+}
+
+function generarRecomendacionesIA(inc,fix,vari,sav,score){
+  const el=document.getElementById('ia-recomendaciones');if(!el)return;
+  // Si se llama sin parámetros, recalcular
+  if(inc===undefined){
+    inc=state.income.reduce((s,i)=>s+i.amt,0);
+    fix=state.fixed.filter(i=>i.cat!=='Ahorro').reduce((s,i)=>s+i.amt,0);
+    vari=state.variable.reduce((s,i)=>s+i.amt,0);
+    sav=state.metas.reduce((s,m)=>s+(m.ahorrado||0),0);
+    const r=calcScore(inc,fix,vari,sav);score=r.score;
+  }
+  if(!inc){el.innerHTML='<span style="color:var(--text3)">Registra tus ingresos y gastos para recibir recomendaciones personalizadas.</span>';return;}
+
+  const pNec=Math.round((fix+vari)/inc*100);
+  const pAho=Math.round(sav/inc*100);
+  const ideal50=inc*0.5,ideal30=inc*0.3,ideal20=inc*0.2;
+  const recs=[];
+
+  if(pNec>80)recs.push(`🔴 <b>Gastos críticos:</b> Estás destinando el ${pNec}% de tus ingresos a gastos (el ideal es máx. 80%). Revisa si puedes renegociar el arriendo, reducir servicios o eliminar suscripciones.`);
+  else if(pNec>65)recs.push(`🟡 <b>Gastos elevados:</b> Tu ${pNec}% en gastos está por encima del 50% recomendado. Identifica 2-3 gastos variables que puedas recortar este mes.`);
+  else recs.push(`✅ <b>Gastos controlados:</b> Tu distribución del ${pNec}% en gastos está dentro del rango saludable. ¡Sigue así!`);
+
+  if(pAho<5)recs.push(`🔴 <b>Ahorro insuficiente:</b> Solo estás ahorrando el ${pAho}%. La meta mínima es el 10%. Empieza con ${fmt(Math.round(inc*0.1))} mensuales hacia una meta de emergencia.`);
+  else if(pAho<20)recs.push(`🟡 <b>Ahorro mejorable:</b> Tu ${pAho}% de ahorro va bien, pero puedes llegar al 20% ideal (${fmt(ideal20)}). Aumenta ${fmt(ideal20-sav)} más este mes.`);
+  else recs.push(`✅ <b>Ahorro excelente:</b> ${pAho}% de ahorro supera el 20% recomendado. Considera invertir el excedente en CDTs o fondos de inversión.`);
+
+  if(fix>ideal50)recs.push(`💡 <b>Gastos fijos altos:</b> Tus gastos fijos (${fmt(fix)}) superan el 50% ideal (${fmt(ideal50)}). Evalúa compromisos que puedas renegociar a largo plazo.`);
+
+  if(state.metas.length===0)recs.push(`🎯 <b>Sin metas de ahorro:</b> Define al menos una meta (fondo de emergencia = 3 meses de gastos = ${fmt((fix+vari)*3)}). Esto es tu red de seguridad.`);
+
+  if(score>=80)recs.push(`🌟 <b>Perfil financiero saludable:</b> Con un score de ${score}/100, estás entre el 20% de personas con mejores hábitos financieros. Considera diversificar en instrumentos de inversión.`);
+
+  const smv=1750905;
+  if(inc<smv*2)recs.push(`📌 <b>Tip Colombia:</b> Si ganas hasta 2 SMMLV (${fmt(smv*2)}), tienes derecho al auxilio de transporte y subsidios de caja de compensación. Verifica que los estés recibiendo.`);
+
+  el.innerHTML=recs.map(r=>`<div style="padding:8px 0;border-bottom:1px solid var(--bg3);line-height:1.6">${r}</div>`).join('').replace(/border-bottom:1px solid var\(--bg3\)">(?![\s\S]*border-bottom)/,'">');
+}
+
+// ALERTAS EN INICIO
+function renderAlertas<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
@@ -293,9 +498,9 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     </div>
   </div>
   <div class="quick-actions">
-    <div class="qa-btn" onclick="openModal('income')"><div class="qa-icon" style="background:var(--green-bg)">💰</div><div><div class="qa-label">Ingreso</div><div class="qa-sub">Registrar</div></div></div>
+    <div class="qa-btn" onclick="openNominalEdit()"><div class="qa-icon" style="background:var(--green-bg)">💰</div><div><div class="qa-label">Nominal</div><div class="qa-sub" id="qa-nominal-sub">Definir salario</div></div></div>
     <div class="qa-btn" onclick="openModal('variable')"><div class="qa-icon" style="background:var(--red-bg)">💸</div><div><div class="qa-label">Gasto</div><div class="qa-sub">Registrar</div></div></div>
-    <div class="qa-btn" onclick="openModal('fixed')"><div class="qa-icon" style="background:var(--blue-bg)">🔒</div><div><div class="qa-label">Fijo</div><div class="qa-sub">Registrar</div></div></div>
+    <div class="qa-btn" onclick="openModal('income')"><div class="qa-icon" style="background:var(--blue-bg)">➕</div><div><div class="qa-label">Ingreso extra</div><div class="qa-sub">Freelance, bono...</div></div></div>
     <div class="qa-btn" onclick="openAhorroModal()"><div class="qa-icon" style="background:var(--purple-bg)">🎯</div><div><div class="qa-label">Ahorrar</div><div class="qa-sub">Abonar meta</div></div></div>
   </div>
   <div class="sec-title">Metas de ahorro</div>
@@ -391,6 +596,67 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   </div>
 </div>
 
+<!-- PRESUPUESTO INTELIGENTE -->
+<div class="screen" id="scr-presupuesto">
+  <div class="page-top">
+    <div><h1>Presupuesto</h1><div class="page-top-sub" id="pres-mes"></div></div>
+  </div>
+
+  <!-- SCORE SALUD FINANCIERA -->
+  <div style="margin:0 14px 14px;background:linear-gradient(135deg,#16163a,#0d0d20);border:1px solid rgba(90,100,255,.25);border-radius:24px;padding:20px;position:relative;overflow:hidden">
+    <div style="position:absolute;top:-40px;right:-30px;width:150px;height:150px;background:radial-gradient(circle,rgba(0,229,160,.15),transparent 70%);pointer-events:none"></div>
+    <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Salud financiera</div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">
+      <div style="position:relative;width:80px;height:80px;flex-shrink:0">
+        <canvas id="scoreChart" width="80" height="80"></canvas>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <div style="font-size:22px;font-weight:800;line-height:1" id="score-num">--</div>
+          <div style="font-size:9px;color:var(--text3)">/100</div>
+        </div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:16px;font-weight:700;margin-bottom:4px" id="score-label">Analizando...</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.5" id="score-desc">Registra ingresos y gastos para ver tu diagnóstico</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="score-metrics"></div>
+  </div>
+
+  <!-- REGLA 50/30/20 -->
+  <div style="margin:0 14px 14px;background:var(--bg2);border:1px solid var(--bg4);border-radius:var(--r);padding:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em">Regla 50 / 30 / 20</div>
+      <div style="font-size:11px;color:var(--text3)" id="pres-ingreso-base"></div>
+    </div>
+    <div id="regla-cards"></div>
+  </div>
+
+  <!-- ALERTAS -->
+  <div id="pres-alertas"></div>
+
+  <!-- CATEGORIAS CON LIMITE -->
+  <div style="margin:0 14px 6px;font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em">Límites por categoría</div>
+  <div id="pres-categorias"></div>
+
+  <!-- NUEVA CATEGORIA -->
+  <div class="nueva-card">
+    <div class="nueva-card-title">+ Nueva categoría de gasto</div>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <input class="nm-input" id="pcat-emoji" placeholder="🛒" style="max-width:56px;text-align:center;margin-bottom:0;flex:0"/>
+      <input class="nm-input" id="pcat-name" placeholder="Categoría (mercado, transporte...)" style="margin-bottom:0;flex:1"/>
+    </div>
+    <input class="nm-input" id="pcat-limite" type="number" placeholder="Límite mensual ($)" min="0"/>
+    <button class="nueva-btn" style="background:var(--blue);color:#fff" onclick="addPresupuesto()">Crear categoría</button>
+  </div>
+
+  <!-- RECOMENDACIONES IA -->
+  <div style="margin:0 14px 14px;background:var(--bg2);border:1px solid var(--bg4);border-radius:var(--r);padding:16px">
+    <div style="font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">✦ Recomendaciones IA</div>
+    <div id="ia-recomendaciones" style="font-size:13px;color:var(--text2);line-height:1.7">Cargando análisis...</div>
+    <button style="width:100%;margin-top:12px;padding:11px;border-radius:var(--r-sm);border:1px solid var(--green);background:var(--green-bg);color:var(--green);font-size:13px;font-weight:600;cursor:pointer" onclick="generarRecomendacionesIA()">↻ Actualizar análisis</button>
+  </div>
+</div>
+
 <!-- GRAFICAS -->
 <div class="screen" id="scr-graficas">
   <div class="page-top"><h1>Gráficas</h1></div>
@@ -428,7 +694,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <div class="modal-handle"></div>
   <div class="modal-header"><div class="modal-title" id="modal-title">Registrar</div><button class="modal-close" onclick="closeModal()">×</button></div>
   <div class="type-sel">
-    <button class="type-btn" id="tb-income" onclick="setType('income')">💰 Ingreso</button>
+    <button class="type-btn" id="tb-income" onclick="setType('income')">💰 Extra</button>
     <button class="type-btn" id="tb-fixed" onclick="setType('fixed')">🔒 Fijo</button>
     <button class="type-btn" id="tb-variable" onclick="setType('variable')">💸 Variable</button>
   </div>
@@ -552,7 +818,7 @@ async function save(){
   try{await setDoc(doc(db,'users',currentUser.uid),{
     income:state.income,fixed:state.fixed,variable:state.variable,
     tasks:state.tasks,metas:state.metas,bolsillos:state.bolsillos,
-    presupuesto:state.presupuesto,ts:Date.now()
+    presupuesto:state.presupuesto,nominal:state.nominal||0,ts:Date.now()
   });}catch(e){toast('Error al guardar');}
   setTimeout(()=>{saving=false;},800);
 }
@@ -975,7 +1241,7 @@ window.switchScreen=(name,btn)=>{
   if(name==='presupuesto')renderPresupuesto();
 };
 
-function renderAll(){calcTotals();renderRecent();renderMetasMini();renderAreas();renderBolsillos();renderAlertasInicio();}
+function renderAll(){calcTotals();renderRecent();renderMetasMini();renderAreas();renderBolsillos();renderAlertasInicio();applyNominalUI();}
 
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script>
