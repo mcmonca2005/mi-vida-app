@@ -313,10 +313,29 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     <input class="nm-input" id="pcat-limite" type="number" placeholder="Límite mensual ($)" min="0"/>
     <button class="nueva-btn" style="background:var(--blue);color:#fff" onclick="addPresupuesto()">Crear categoría</button>
   </div>
+  <!-- ASESOR IA -->
   <div style="margin:0 14px 14px;background:var(--bg2);border:1px solid var(--bg4);border-radius:var(--r);padding:16px">
-    <div style="font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">✦ Recomendaciones IA</div>
-    <div id="ia-recomendaciones" style="font-size:13px;color:var(--text2);line-height:1.7">Cargando análisis...</div>
-    <button style="width:100%;margin-top:12px;padding:11px;border-radius:var(--r-sm);border:1px solid var(--green);background:var(--green-bg);color:var(--green);font-size:13px;font-weight:600;cursor:pointer" onclick="generarRecomendacionesIA()">↻ Actualizar análisis</button>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+      <div style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">✦</div>
+      <div>
+        <div style="font-size:14px;font-weight:700">Asesor financiero IA</div>
+        <div style="font-size:11px;color:var(--text3)">Pregunta sobre cualquier decisión de compra</div>
+      </div>
+    </div>
+    <!-- EJEMPLOS RÁPIDOS -->
+    <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:10px 0;-webkit-overflow-scrolling:touch" id="ia-ejemplos">
+      <div onclick="setIAPregunta(this.textContent)" style="flex-shrink:0;background:var(--bg3);border:1px solid var(--bg4);border-radius:20px;padding:6px 12px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap">¿Puedo comprar un celular de $2.000.000?</div>
+      <div onclick="setIAPregunta(this.textContent)" style="flex-shrink:0;background:var(--bg3);border:1px solid var(--bg4);border-radius:20px;padding:6px 12px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap">¿Conviene sacar un crédito de consumo?</div>
+      <div onclick="setIAPregunta(this.textContent)" style="flex-shrink:0;background:var(--bg3);border:1px solid var(--bg4);border-radius:20px;padding:6px 12px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap">¿Cuánto debería ahorrar cada mes?</div>
+      <div onclick="setIAPregunta(this.textContent)" style="flex-shrink:0;background:var(--bg3);border:1px solid var(--bg4);border-radius:20px;padding:6px 12px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap">¿Puedo salir a comer este fin de semana?</div>
+    </div>
+    <!-- CHAT -->
+    <div id="ia-chat" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;scrollbar-width:none"></div>
+    <!-- INPUT -->
+    <div style="display:flex;gap:8px;align-items:flex-end">
+      <textarea id="ia-input" placeholder="¿Puedo comprar X cosa que vale $Y?" rows="2" style="flex:1;background:var(--bg3);border:1.5px solid var(--bg4);border-radius:var(--r-sm);padding:10px 12px;color:var(--text);font-size:13px;outline:none;resize:none;font-family:inherit;line-height:1.4;transition:border .15s" onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='var(--bg4)'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarIA()}"></textarea>
+      <button onclick="enviarIA()" id="ia-send-btn" style="background:var(--green);border:none;border-radius:var(--r-sm);color:#000;font-weight:700;font-size:18px;width:42px;height:42px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s">↑</button>
+    </div>
   </div>
 </div>
 
@@ -664,23 +683,94 @@ function renderAlertasInicio(){
 }
 window.addPresupuesto=()=>{const name=document.getElementById('pcat-name').value.trim();const lim=parseFloat(document.getElementById('pcat-limite').value);const emoji=document.getElementById('pcat-emoji').value.trim()||'📋';if(!name||isNaN(lim)||lim<=0){toast('Completa nombre y límite');return;}if(!state.presupuesto)state.presupuesto=[];state.presupuesto.push({name,limite:lim,emoji});document.getElementById('pcat-name').value='';document.getElementById('pcat-limite').value='';document.getElementById('pcat-emoji').value='';save();renderPresupuesto();toast('Categoría creada ✓');};
 window.deletePresupuesto=(i)=>{state.presupuesto.splice(i,1);save();renderPresupuesto();};
-window.generarRecomendacionesIA=(inc,fix,vari,sav,score)=>{
-  const el=document.getElementById('ia-recomendaciones');if(!el)return;
-  if(inc===undefined){const t=calcTotals();inc=t.nominal||0;fix=t.fix;vari=t.vari;sav=t.sav;const r=calcScore(inc,fix,vari,sav);score=r.score;}
-  if(!inc){el.innerHTML='<span style="color:var(--text3)">Define tu ingreso nominal para recibir recomendaciones personalizadas.</span>';return;}
-  const pNec=Math.round((fix+vari)/inc*100),pAho=Math.round(sav/inc*100);
-  const recs=[];
-  if(pNec>80)recs.push(`🔴 <b>Gastos críticos (${pNec}%):</b> Estás por encima del 80% recomendado. Revisa si puedes renegociar arriendo, eliminar suscripciones o reducir gastos variables.`);
-  else if(pNec>65)recs.push(`🟡 <b>Gastos elevados (${pNec}%):</b> Superas el 50% ideal. Identifica 2-3 gastos variables que puedas recortar este mes.`);
-  else recs.push(`✅ <b>Gastos controlados (${pNec}%):</b> Tu distribución de gastos está dentro del rango saludable. ¡Sigue así!`);
-  if(pAho<5)recs.push(`🔴 <b>Ahorro insuficiente (${pAho}%):</b> La meta mínima es el 10%. Empieza con ${fmt(Math.round(inc*.1))} mensuales hacia una meta de emergencia.`);
-  else if(pAho<20)recs.push(`🟡 <b>Ahorro mejorable (${pAho}%):</b> Vas bien pero puedes llegar al 20% ideal (${fmt(inc*.2)}). Aumenta ${fmt(inc*.2-sav)} más este mes.`);
-  else recs.push(`✅ <b>Ahorro excelente (${pAho}%):</b> Superas el 20% recomendado. Considera invertir el excedente en CDTs o fondos de inversión.`);
-  if(state.metas.length===0)recs.push(`🎯 <b>Sin metas de ahorro:</b> Define al menos un fondo de emergencia equivalente a 3 meses de gastos (${fmt((fix+vari)*3)}). Es tu red de seguridad.`);
-  if(fix>inc*.5)recs.push(`💡 <b>Gastos fijos altos:</b> Tus compromisos fijos (${fmt(fix)}) superan el 50% de tu ingreso. Evalúa si puedes renegociar algún contrato a largo plazo.`);
-  if(score>=80)recs.push(`🌟 <b>Perfil financiero sólido:</b> Con un score de ${score}/100 estás entre las personas con mejores hábitos financieros. Considera diversificar en instrumentos de inversión.`);
-  el.innerHTML=recs.map(r=>`<div style="padding:8px 0;border-bottom:1px solid var(--bg3);line-height:1.6">${r}</div>`).join('');
+// ASESOR IA
+window.setIAPregunta=(txt)=>{const inp=document.getElementById('ia-input');if(inp){inp.value=txt;inp.focus();}};
+
+window.enviarIA=async()=>{
+  const inp=document.getElementById('ia-input');
+  const pregunta=inp.value.trim();
+  if(!pregunta)return;
+  inp.value='';
+  const btn=document.getElementById('ia-send-btn');if(btn)btn.disabled=true;
+
+  // Datos financieros del usuario
+  const{nominal,extras,incTotal,fix,vari,bal,sav}=calcTotals();
+  const pct_gastos=incTotal>0?Math.round((fix+vari)/incTotal*100):0;
+  const pct_ahorro=incTotal>0?Math.round(sav/incTotal*100):0;
+
+  // Agregar mensaje del usuario al chat
+  addChatMsg(pregunta,'user');
+
+  // Indicador de carga
+  const loadId='load-'+Date.now();
+  addChatMsg('Analizando tu situación financiera...','ia',loadId,true);
+
+  const contexto=`Eres un asesor financiero personal experto en finanzas personales para Colombia. 
+Eres directo, honesto y práctico. Usas metodologías como la regla 50/30/20, fondo de emergencia, y principios de educación financiera.
+Siempre das una respuesta clara de VIABILIDAD (sí/no/depende) y el razonamiento.
+
+SITUACIÓN FINANCIERA ACTUAL DEL USUARIO:
+- Ingreso nominal mensual: ${fmt(nominal||0)}
+- Ingresos extras: ${fmt(extras)}
+- Total ingresos: ${fmt(incTotal)}
+- Gastos fijos: ${fmt(fix)}
+- Gastos variables: ${fmt(vari)}
+- Total gastos: ${fmt(fix+vari)} (${pct_gastos}% del ingreso)
+- Ahorros acumulados en metas: ${fmt(sav)} (${pct_ahorro}% del ingreso)
+- Balance disponible actual: ${fmt(bal)}
+- Metas de ahorro: ${state.metas.length>0?state.metas.map(m=>`${m.name}: ${fmt(m.ahorrado||0)} de ${fmt(m.objetivo)}`).join(', '):'Sin metas definidas'}
+
+Responde en máximo 4 párrafos cortos. Estructura tu respuesta así:
+1. Veredicto directo (✅ Viable / ⚠️ Con precaución / ❌ No recomendado)
+2. Por qué (basado en sus números reales)
+3. Condición o alternativa si aplica
+4. Consejo táctico concreto
+
+Responde en español, tono amigable pero profesional. Sin markdown excesivo.`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:contexto,
+        messages:[{role:'user',content:pregunta}]
+      })
+    });
+    const data=await res.json();
+    const respuesta=data.content?.[0]?.text||'No pude procesar la respuesta.';
+    // Remover indicador de carga y agregar respuesta
+    removeChatMsg(loadId);
+    addChatMsg(respuesta,'ia');
+  }catch(e){
+    removeChatMsg(loadId);
+    addChatMsg('Hubo un error al consultar el asesor. Intenta de nuevo.','ia');
+  }
+  if(btn)btn.disabled=false;
 };
+
+function addChatMsg(text,role,id,loading=false){
+  const chat=document.getElementById('ia-chat');if(!chat)return;
+  const div=document.createElement('div');
+  if(id)div.id=id;
+  const isUser=role==='user';
+  div.style.cssText=`display:flex;gap:8px;align-items:flex-start;${isUser?'flex-direction:row-reverse':''}`;
+  const avatar=document.createElement('div');
+  avatar.style.cssText=`width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;${isUser?'background:var(--blue-bg);color:var(--blue)':'background:linear-gradient(135deg,var(--green),var(--blue));color:#000'}`;
+  avatar.textContent=isUser?'Tú':'✦';
+  const bubble=document.createElement('div');
+  bubble.style.cssText=`max-width:85%;padding:10px 13px;border-radius:${isUser?'14px 4px 14px 14px':'4px 14px 14px 14px'};font-size:13px;line-height:1.6;${isUser?'background:var(--blue-bg);color:var(--text)':'background:var(--bg3);color:var(--text2)'}${loading?';opacity:.6;font-style:italic':''}`;
+  // Formatear texto: convertir **texto** a bold
+  bubble.innerHTML=text.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>');
+  div.appendChild(avatar);div.appendChild(bubble);
+  chat.appendChild(div);
+  chat.scrollTop=chat.scrollHeight;
+}
+
+function removeChatMsg(id){const el=document.getElementById(id);if(el)el.remove();}
+
 
 // GRAFICAS
 let donutInst=null,barInst=null;
