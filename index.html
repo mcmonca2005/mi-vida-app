@@ -692,64 +692,72 @@ window.enviarIA=async()=>{
   if(!pregunta)return;
   inp.value='';
   const btn=document.getElementById('ia-send-btn');if(btn)btn.disabled=true;
-
-  // Datos financieros del usuario
-  const{nominal,extras,incTotal,fix,vari,bal,sav}=calcTotals();
-  const pct_gastos=incTotal>0?Math.round((fix+vari)/incTotal*100):0;
-  const pct_ahorro=incTotal>0?Math.round(sav/incTotal*100):0;
-
-  // Agregar mensaje del usuario al chat
   addChatMsg(pregunta,'user');
-
-  // Indicador de carga
   const loadId='load-'+Date.now();
-  addChatMsg('Analizando tu situación financiera...','ia',loadId,true);
-
-  const contexto=`Eres un asesor financiero personal experto en finanzas personales para Colombia. 
-Eres directo, honesto y práctico. Usas metodologías como la regla 50/30/20, fondo de emergencia, y principios de educación financiera.
-Siempre das una respuesta clara de VIABILIDAD (sí/no/depende) y el razonamiento.
-
-SITUACIÓN FINANCIERA ACTUAL DEL USUARIO:
-- Ingreso nominal mensual: ${fmt(nominal||0)}
-- Ingresos extras: ${fmt(extras)}
-- Total ingresos: ${fmt(incTotal)}
-- Gastos fijos: ${fmt(fix)}
-- Gastos variables: ${fmt(vari)}
-- Total gastos: ${fmt(fix+vari)} (${pct_gastos}% del ingreso)
-- Ahorros acumulados en metas: ${fmt(sav)} (${pct_ahorro}% del ingreso)
-- Balance disponible actual: ${fmt(bal)}
-- Metas de ahorro: ${state.metas.length>0?state.metas.map(m=>`${m.name}: ${fmt(m.ahorrado||0)} de ${fmt(m.objetivo)}`).join(', '):'Sin metas definidas'}
-
-Responde en máximo 4 párrafos cortos. Estructura tu respuesta así:
-1. Veredicto directo (✅ Viable / ⚠️ Con precaución / ❌ No recomendado)
-2. Por qué (basado en sus números reales)
-3. Condición o alternativa si aplica
-4. Consejo táctico concreto
-
-Responde en español, tono amigable pero profesional. Sin markdown excesivo.`;
-
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        system:contexto,
-        messages:[{role:'user',content:pregunta}]
-      })
-    });
-    const data=await res.json();
-    const respuesta=data.content?.[0]?.text||'No pude procesar la respuesta.';
-    // Remover indicador de carga y agregar respuesta
+  addChatMsg('Analizando tu situación...','ia',loadId,true);
+  setTimeout(()=>{
     removeChatMsg(loadId);
+    const respuesta=analizarPregunta(pregunta);
     addChatMsg(respuesta,'ia');
-  }catch(e){
-    removeChatMsg(loadId);
-    addChatMsg('Hubo un error al consultar el asesor. Intenta de nuevo.','ia');
-  }
-  if(btn)btn.disabled=false;
+    if(btn)btn.disabled=false;
+  },800);
 };
+
+function analizarPregunta(pregunta){
+  const{nominal,incTotal,fix,vari,bal,sav}=calcTotals();
+  const inc=incTotal||0;
+  const pGastos=inc>0?Math.round((fix+vari)/inc*100):0;
+  const pAhorro=inc>0?Math.round(sav/inc*100):0;
+  const libre=bal;
+  const q=pregunta.toLowerCase();
+
+  // Extraer monto si lo mencionan
+  const montoMatch=pregunta.match(/[\$]?\s*(\d[\d.,]*)/);
+  let monto=0;
+  if(montoMatch){monto=parseFloat(montoMatch[1].replace(/[.,]/g,''));if(monto<1000&&pregunta.includes('.'))monto=parseFloat(montoMatch[1].replace(/\./g,'').replace(',','.'));}
+
+  // Sin datos financieros
+  if(!inc){return '⚠️ **Sin datos financieros**\n\nAún no has definido tu ingreso nominal. Ve a Inicio → toca el botón "Nominal" y configura tu salario base. Con eso puedo darte un análisis preciso de tu situación.';}
+
+  // Análisis por tipo de pregunta
+  let resp='';
+
+  // Pregunta de compra con monto
+  if((q.includes('comprar')||q.includes('comprando')||q.includes('compra')||q.includes('gastar')||q.includes('vale')||q.includes('cuesta'))&&monto>0){
+    const pctDelBalance=Math.round(monto/libre*100);
+    const pctDelNominal=Math.round(monto/inc*100);
+    const mesesAhorro=monto>0&&inc>0?Math.ceil(monto/(inc*0.2)):0;
+    if(libre<=0){resp=`❌ **No es el momento**\n\nTu balance disponible es ${fmt(libre)}, lo que significa que ya tienes más compromisos que ingresos. Comprar algo de ${fmt(monto)} ahora solo empeoraría tu situación.\n\n**Alternativa:** Espera hasta tener al menos ${fmt(monto*1.2)} de balance libre antes de hacer esta compra.\n\n**Táctica:** Revisa tus gastos variables y elimina uno este mes para recuperar terreno.`;}
+    else if(monto>libre){resp=`❌ **No recomendado en este momento**\n\nEsta compra de ${fmt(monto)} supera tu balance disponible de ${fmt(libre)}. No tienes el flujo para absorberla sin endeudarte.\n\n**Si realmente la necesitas:** Ahorrando el 20% de tu ingreso (${fmt(inc*0.2)}/mes), podrías tenerla en **${mesesAhorro} mes${mesesAhorro>1?'es':''}**.\n\n**Regla de oro:** Nunca comprometas más del 30% de tu balance libre en una sola compra.`;}
+    else if(monto>libre*0.5){resp=`⚠️ **Con precaución**\n\nLa compra de ${fmt(monto)} representa el ${pctDelBalance}% de tu balance disponible (${fmt(libre)}). Es posible pero te deja sin colchón.\n\n**Antes de decidir pregúntate:** ¿Es una necesidad o un deseo? ¿Tienes fondo de emergencia para 3 meses de gastos (${fmt((fix+vari)*3)})?\n\n**Si lo compras:** Reduce gastos variables este mes para recuperar el balance.`;}
+    else if(pctDelNominal>30){resp=`⚠️ **Viable pero considera alternativas**\n\nEl ${fmt(monto)} representa el ${pctDelNominal}% de tu ingreso mensual. Tienes el dinero (balance: ${fmt(libre)}), pero es un gasto significativo.\n\n**Táctica recomendada:** Si hay versión de menor precio que cumpla la función, considera esa. Si es necesario, hazlo — pero no repitas compras de este tamaño el mismo mes.\n\n**Positivo:** Tu balance lo aguanta sin endeudarte.`;}
+    else{resp=`✅ **Sí, es viable**\n\nLa compra de ${fmt(monto)} representa solo el ${pctDelBalance}% de tu balance disponible (${fmt(libre)}). Es completamente manejable.\n\n**Condición:** Asegúrate de que no tienes otros gastos pendientes este mes que no hayas registrado.\n\n**Consejo:** Registra el gasto en la app para mantener tu presupuesto actualizado.`;}
+    return resp;
+  }
+
+  // Preguntas sobre crédito/deuda
+  if(q.includes('crédito')||q.includes('credito')||q.includes('préstamo')||q.includes('prestamo')||q.includes('deuda')||q.includes('cuota')||q.includes('financiar')){
+    if(pGastos>70){return `❌ **No es buen momento para endeudarte**\n\nYa destinas el ${pGastos}% de tu ingreso a gastos. Agregar una cuota de crédito te llevaría por encima del 80% recomendado, zona de riesgo financiero.\n\n**Primero:** Reduce tus gastos variables hasta estar por debajo del 65% antes de asumir nueva deuda.\n\n**Regla:** La cuota mensual nunca debería superar el 15-20% de tu ingreso (${fmt(inc*0.15)} - ${fmt(inc*0.2)}).`;}
+    else{return `⚠️ **Depende del monto y la tasa**\n\nTu carga actual de gastos es del ${pGastos}%, lo que te da margen. Sin embargo, antes de tomar un crédito evalúa:\n\n1. ¿La cuota mensual cabe en el 15% de tu ingreso? (máx. ${fmt(inc*0.15)}/mes)\n2. ¿La tasa es inferior al 2% mensual? (créditos de consumo en Colombia rondan 1.5-2.5%)\n3. ¿Es para algo que genera valor o solo consumo?\n\n**Táctica:** Si es para algo que puedes ahorrar en menos de 6 meses, mejor ahorra y evita la deuda.`;}
+  }
+
+  // Preguntas sobre ahorro
+  if(q.includes('ahorrar')||q.includes('ahorro')||q.includes('ahorrando')){
+    const metaEmergencia=(fix+vari)*3;
+    const faltaEmergencia=Math.max(0,metaEmergencia-sav);
+    return `💡 **Tu plan de ahorro ideal**\n\nCon tu ingreso de ${fmt(inc)}, la regla 50/30/20 sugiere ahorrar **${fmt(inc*0.2)}/mes** (20%).\n\nActualmente ahorras el ${pAhorro}% (${fmt(sav)} acumulado).\n\n**Prioridades:**\n1. Fondo de emergencia (3 meses de gastos = ${fmt(metaEmergencia)}) — te faltan ${fmt(faltaEmergencia)}\n2. Metas a corto plazo (viajes, tecnología)\n3. Inversión a largo plazo (CDTs, fondos)\n\n**Táctica:** Automatiza el ahorro — apenas recibas tu pago, transfiere inmediatamente el 20% a una cuenta separada.`;
+  }
+
+  // Pregunta sobre salir/ocio
+  if(q.includes('salir')||q.includes('restaurante')||q.includes('comer')||q.includes('viaje')||q.includes('plan')||q.includes('entretenimiento')){
+    if(pGastos>80){return `⚠️ **Con moderación**\n\nTus gastos actuales (${pGastos}%) están en zona de alerta. Puedes salir, pero establece un límite claro para ese plan (máx. ${fmt(Math.min(libre*0.1,100000))}) y regístralo.\n\n**Recuerda:** El ocio es importante para el bienestar, pero no a costa de tus compromisos fijos.`;}
+    else if(libre>0){return `✅ **Sí, date ese gusto**\n\nTu balance disponible es ${fmt(libre)} y tus gastos están en ${pGastos}%, dentro de lo saludable. Mereces disfrutar.\n\n**Solo establece un presupuesto** para ese plan y regístralo como gasto variable. Las finanzas saludables incluyen disfrutar el presente.`;}
+    else{return `❌ **No en este momento**\n\nTu balance disponible es ${fmt(libre)}. Antes de gastos de ocio, necesitas estabilizar tu flujo.\n\n**Pronto:** Una vez recuperes balance positivo, ese plan es totalmente viable.`;}
+  }
+
+  // Pregunta general / no reconocida
+  return `💬 **Mi análisis de tu situación**\n\nCon base en tus finanzas actuales:\n\n• **Ingreso:** ${fmt(inc)} | **Gastos:** ${pGastos}% | **Ahorro:** ${pAhorro}%\n• **Balance libre:** ${fmt(libre)}\n• **Salud financiera:** ${pGastos<=50&&pAhorro>=20?'Excelente 🌟':pGastos<=65?'Buena 👍':pGastos<=80?'Regular ⚡':'Crítica ⚠️'}\n\nPara darte un análisis más preciso, cuéntame:\n- ¿Qué quieres comprar o decidir?\n- ¿Cuánto vale?\n\nAsí puedo darte una recomendación concreta basada en tus números reales.`;
+}
 
 function addChatMsg(text,role,id,loading=false){
   const chat=document.getElementById('ia-chat');if(!chat)return;
